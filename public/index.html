@@ -67,7 +67,7 @@
   <input id="input" autocomplete="off" placeholder="Type a message..."/>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io();
+    const socket = io('https://chat-server-client-5t0q.onrender.com'); // Replace with your actual Render URL
 
     const messagesDiv = document.getElementById('messages');
     const input = document.getElementById('input');
