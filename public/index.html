@@ -1,0 +1,112 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+    }
+
+    #messages {
+      width: 80%;
+      max-width: 600px;
+      height: 60%;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background-color: #f0f0f0;
+    }
+
+    .message.self {
+      background-color: #d1e7ff;
+      text-align: right;
+    }
+
+    #input {
+      margin-top: 10px;
+      width: 80%;
+      max-width: 600px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #input:focus {
+      border-color: #007bff;
+    }
+
+    .notification {
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div id="messages"></div>
+  <input id="input" autocomplete="off" placeholder="Type a message..."/>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('input');
+
+    // Helper function to add a message or notification
+    function addMessage(content, type = '') {
+      const newMessage = document.createElement('div');
+      newMessage.className = type === 'self' ? 'message self' : 'message';
+      if (type === 'notification') {
+        newMessage.className = 'notification';
+      }
+      newMessage.textContent = content;
+      messagesDiv.appendChild(newMessage);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll
+    }
+
+    // Handle connection
+    socket.on('connect', () => {
+      addMessage('You have connected to the chat.', 'notification');
+      addMessage('You can type /commands to view available commands.', 'notification');
+      console.log('Connected to the server.');
+    });
+
+    // Handle messages from the server
+    socket.on('message', (msg) => {
+      addMessage(msg);
+    });
+
+    // Send input from the user
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const message = input.value.trim();
+        if (message) {
+          addMessage(`You: ${message}`, 'self'); // Show user's message locally
+          socket.emit('message', message);
+          input.value = '';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
